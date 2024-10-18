@@ -63,9 +63,25 @@ public class Boss : MonoBehaviour
     private void Die()
     {
         Debug.Log("Boss died!");
-        FindObjectOfType<Victory>().ShowVictoryText(); // เรียกใช้ฟังก์ชันแสดงข้อความ Victory
-        Destroy(gameObject); // ลบ GameObject นี้ออกจากฉาก
+        Animator animator = GetComponent<Animator>();
+        animator.SetTrigger("Explode"); // เรียก trigger เพื่อเริ่มอนิเมชั่นระเบิด
+
+    
+        StartCoroutine(WaitForExplosion());
+        
     }
+
+    private IEnumerator WaitForExplosion()
+{
+    // รอเวลาของอนิเมชั่น (คุณอาจต้องตั้งค่าเวลาของอนิเมชั่นให้เหมาะสม)
+    yield return new WaitForSeconds(1.5f); // เปลี่ยนเวลาตามความยาวของอนิเมชั่น
+
+    // แสดงข้อความ Victory
+    FindObjectOfType<Victory>().ShowVictoryText();
+
+    // ลบ GameObject ของบอส
+    Destroy(gameObject);
+}
 
     private void OnCollisionEnter2D(Collision2D collision)
 {

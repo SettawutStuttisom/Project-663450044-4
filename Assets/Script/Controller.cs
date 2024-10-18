@@ -15,6 +15,7 @@ public class PlayerMovement : MonoBehaviour
     public AudioSource shootingSound;
     private PlayerHealth playerHealth;
     private SpriteRenderer spriteRenderer;
+    private Animator animator;
 
     
     private void Start()
@@ -22,18 +23,36 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>(); // รับข้อมูล Rigidbody2D
         StartCoroutine(ShootContinuously()); // เริ่ม Coroutine สำหรับการยิงกระสุน
         playerHealth = GetComponent<PlayerHealth>();
+        animator = GetComponent<Animator>();
         
     }
 
     private void Update()
     {
-        // รับข้อมูลการเคลื่อนที่จากผู้ใช้
         float moveX = Input.GetAxis("Horizontal");
         float moveY = Input.GetAxis("Vertical");
 
         // สร้าง vector สำหรับการเคลื่อนที่
         Vector2 move = new Vector2(moveX, moveY).normalized; // ปรับค่าเพื่อไม่ให้ผู้เล่นเคลื่อนที่เร็วขึ้นเมื่อกดสองปุ่มพร้อมกัน
         rb.MovePosition(rb.position + move * moveSpeed * Time.fixedDeltaTime); // ใช้ MovePosition แทนการ Translate
+
+        // อัพเดทการเอียงซ้าย-ขวาของอนิเมชั่น
+        if (moveX < 0)
+        {
+            animator.SetBool("isTiltingLeft", true);
+            animator.SetBool("isTiltingRight", false);
+        }
+        else if (moveX > 0)
+        {
+            animator.SetBool("isTiltingLeft", false);
+            animator.SetBool("isTiltingRight", true);
+        }
+        else
+        {
+            animator.SetBool("isTiltingLeft", false);
+            animator.SetBool("isTiltingRight", false);
+        }       
+
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -46,6 +65,8 @@ public class PlayerMovement : MonoBehaviour
         if (playerHealth != null)
         {
             playerHealth.TakeDamage(1); // ลดพลังชีวิตของผู้เล่น
+
+            animator.SetTrigger("Spindmg");
         }
 
         // เรียกฟังก์ชัน Die ใน Enemy
